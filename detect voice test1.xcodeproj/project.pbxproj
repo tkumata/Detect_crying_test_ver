@@ -13,6 +13,8 @@
 		89A1FC271BD74B2800367C77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 89A1FC251BD74B2800367C77 /* Main.storyboard */; };
 		89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 89A1FC281BD74B2800367C77 /* Assets.xcassets */; };
 		89A1FC2C1BD74B2800367C77 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 89A1FC2A1BD74B2800367C77 /* LaunchScreen.storyboard */; };
+		89A1FC341BD74B4100367C77 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 89A1FC331BD74B4100367C77 /* AVFoundation.framework */; };
+		89A1FC361BD753F000367C77 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 89A1FC351BD753F000367C77 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		89A1FC281BD74B2800367C77 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		89A1FC2B1BD74B2800367C77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89A1FC2D1BD74B2800367C77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		89A1FC331BD74B4100367C77 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		89A1FC351BD753F000367C77 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +37,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				89A1FC361BD753F000367C77 /* AudioToolbox.framework in Frameworks */,
+				89A1FC341BD74B4100367C77 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +48,8 @@
 		89A1FC101BD74B2800367C77 = {
 			isa = PBXGroup;
 			children = (
+				89A1FC351BD753F000367C77 /* AudioToolbox.framework */,
+				89A1FC331BD74B4100367C77 /* AVFoundation.framework */,
 				89A1FC1B1BD74B2800367C77 /* detect voice test1 */,
 				89A1FC1A1BD74B2800367C77 /* Products */,
 			);
@@ -111,6 +119,11 @@
 					89A1FC181BD74B2800367C77 = {
 						CreatedOnToolsVersion = 7.1;
 						DevelopmentTeam = RA8AYBBYPE;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
