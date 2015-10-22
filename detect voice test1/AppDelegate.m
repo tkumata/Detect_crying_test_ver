@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 @interface AppDelegate ()
 
@@ -17,6 +19,27 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    NSError *error = nil;
+    
+    // 使用している機種が録音に対応しているか
+    if ([audioSession isInputAvailable]) {
+        [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
+    }
+    
+    if (error) {
+        NSLog(@"audioSession: %@ %d %@", [error domain], [error code], [[error userInfo] description]);
+        return NO;
+    }
+    
+    // 録音機能をアクティブにする
+    [audioSession setActive:YES error:&error];
+    
+    if (error) {
+        NSLog(@"audioSession: %@ %d %@", [error domain], [error code], [[error userInfo] description]);
+        return NO;
+    }
+    
     return YES;
 }
 

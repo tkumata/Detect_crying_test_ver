@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
 		89A1FC1E1BD74B2800367C77 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC1D1BD74B2800367C77 /* main.m */; };
 		89A1FC211BD74B2800367C77 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC201BD74B2800367C77 /* AppDelegate.m */; };
 		89A1FC241BD74B2800367C77 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC231BD74B2800367C77 /* ViewController.m */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		89A1FC191BD74B2800367C77 /* detect voice test1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "detect voice test1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		89A1FC1D1BD74B2800367C77 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		89A1FC1F1BD74B2800367C77 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -37,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */,
 				89A1FC361BD753F000367C77 /* AudioToolbox.framework in Frameworks */,
 				89A1FC341BD74B4100367C77 /* AVFoundation.framework in Frameworks */,
 			);
@@ -48,6 +51,7 @@
 		89A1FC101BD74B2800367C77 = {
 			isa = PBXGroup;
 			children = (
+				899C76D01BD85F57009E727B /* Accelerate.framework */,
 				89A1FC351BD753F000367C77 /* AudioToolbox.framework */,
 				89A1FC331BD74B4100367C77 /* AVFoundation.framework */,
 				89A1FC1B1BD74B2800367C77 /* detect voice test1 */,
@@ -314,6 +318,7 @@
 				89A1FC321BD74B2800367C77 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

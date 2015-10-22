@@ -10,9 +10,15 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-@interface ViewController ()
+@interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
+    AVAudioRecorder *avRecorder;
+    AVAudioPlayer *avPlayer;
+}
 
 @end
+
+// Save dir
+#define DocumentsFolder [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"]
 
 @implementation ViewController
 
@@ -41,8 +47,7 @@ static void AudioInputCallback(
 
 #pragma mark Recording Meter
 
-- (void)startUpdatingVolume
-{
+- (void)startUpdatingVolume {
     // 記録するデータフォーマットを決める
     AudioStreamBasicDescription dataFormat;
     dataFormat.mSampleRate = 44100.0f;
@@ -71,16 +76,14 @@ static void AudioInputCallback(
                                              repeats:YES];
 }
 
-- (void)stopUpdatingVolume
-{
+- (void)stopUpdatingVolume {
     // キューを空にして停止
     AudioQueueFlush(_queue);
     AudioQueueStop(_queue, NO);
     AudioQueueDispose(_queue, YES);
 }
 
-- (void)detectVolume:(NSTimer *)timer
-{
+- (void)detectVolume:(NSTimer *)timer {
     // レベルを取得
     AudioQueueLevelMeterState levelMeter;
     UInt32 levelMeterSize = sizeof(AudioQueueLevelMeterState);
@@ -91,7 +94,86 @@ static void AudioInputCallback(
     self.averageTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mAveragePower];
     
     // mPeakPowerが -1.0 以上なら "LOUD!!" と表示
-    self.loudLabel.hidden = (levelMeter.mPeakPower >= -1.0f) ? NO : YES;
+//    self.loudLabel.hidden = (levelMeter.mPeakPower >= -1.0f) ? NO : YES;
+    if (levelMeter.mPeakPower >= -1.0f) {
+        self.loudLabel.hidden = NO;
+        [self record];
+    }
+}
+
+#pragma mark Recording
+
+- (void)record {
+    [_timer invalidate];
+    
+    // 録音データを保存する場所
+    NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
+    NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
+    
+    // 録音の設定 AVNumberOfChannelsKey チャンネル数1
+    NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
+                              [NSNumber numberWithFloat:44100.0], AVSampleRateKey,
+                              [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+                              [NSNumber numberWithInt:1], AVNumberOfChannelsKey,
+                              [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
+                              [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
+                              [NSNumber numberWithBool:NO], AVLinearPCMIsFloatKey,
+                              nil];
+    
+    // インスタンス生成(エラー処理は省略)
+    NSError *error = nil;
+    avRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:settings error:&error];
+    avRecorder.delegate = self;
+    
+    // 録音ファイルの準備(すでにファイルが存在していれば上書きしてくれる)
+    [avRecorder prepareToRecord];
+    
+    // 録音中に音量をとるかどうか
+    avRecorder.meteringEnabled = NO;
+    
+    // 録音開始
+//    [recorder record];
+    [avRecorder recordForDuration:5.0];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    // 録音終了
+    [avRecorder stop];
+    [self stopUpdatingVolume];
+    
+    // 録音データの削除。stop メソッドを呼ぶ前に呼んではいけない
+//    [recorder deleteRecording];
+    
+    self.loudLabel.hidden = YES;
+}
+
+// 録音が終わったら呼ばれるメソッド
+- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag {
+    NSLog(@"%@", @"録音終了");
+}
+
+- (void)dealloc {
+    avRecorder.delegate = nil;
+}
+
+#pragma Play recorded file
+
+- (void)play {
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    [audioSession setCategory:AVAudioSessionCategoryAmbient error:nil];
+    
+    // 録音ファイルパス
+//    NSArray *filePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//    NSString *documentDir = [filePaths objectAtIndex:0];
+    NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
+//    NSString *path = [documentDir stringByAppendingPathComponent:@"audio.caf"];
+    NSURL *recordingURL = [NSURL fileURLWithPath:path];
+    
+    //再生
+    avPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:recordingURL error:nil];
+    avPlayer.delegate = self;
+    avPlayer.volume=1.0;
+    [avPlayer play];
 }
 
 @end

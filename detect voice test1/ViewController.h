@@ -16,9 +16,7 @@
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *loudLabel;
-
 @property (weak, nonatomic) IBOutlet UITextField *peakTextField;
-
 @property (weak, nonatomic) IBOutlet UITextField *averageTextField;
 
 @end
