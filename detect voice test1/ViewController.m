@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import "MyFFT.h"
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -150,6 +151,7 @@ static void AudioInputCallback(
 // 録音が終わったら呼ばれるメソッド
 - (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag {
     NSLog(@"%@", @"録音終了");
+    [self processFFT];
 }
 
 - (void)dealloc {
@@ -165,8 +167,8 @@ static void AudioInputCallback(
     // 録音ファイルパス
 //    NSArray *filePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 //    NSString *documentDir = [filePaths objectAtIndex:0];
-    NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
 //    NSString *path = [documentDir stringByAppendingPathComponent:@"audio.caf"];
+    NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
     NSURL *recordingURL = [NSURL fileURLWithPath:path];
     
     //再生
@@ -174,6 +176,70 @@ static void AudioInputCallback(
     avPlayer.delegate = self;
     avPlayer.volume=1.0;
     [avPlayer play];
+}
+
+#pragma mark FFT
+
+- (void)processFFT {
+    NSArray *filePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentDir = [filePaths objectAtIndex:0];
+    NSString *soundPath = [documentDir stringByAppendingPathComponent:@"audio.caf"];
+//    NSString *soundPath = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
+//    NSString* soundPath; // さっき録音したファイル
+    CFURLRef cfurl = (__bridge CFURLRef)[NSURL fileURLWithPath:soundPath];
+    
+    ExtAudioFileRef audioFile;
+    OSStatus status;
+    
+    status = ExtAudioFileOpenURL(cfurl, &audioFile);
+    
+    const UInt32 frameCount = 1024;
+    const int channelCountPerFrame = 1;
+    
+    AudioStreamBasicDescription clientFormat;
+    clientFormat.mChannelsPerFrame = channelCountPerFrame;
+    clientFormat.mSampleRate = 44100;
+    
+    clientFormat.mFormatID = kAudioFormatLinearPCM;
+    clientFormat.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved;
+    int cmpSize = sizeof(float);
+    int frameSize = cmpSize*channelCountPerFrame;
+    clientFormat.mBitsPerChannel = cmpSize*8;
+    clientFormat.mBytesPerPacket = frameSize;
+    clientFormat.mFramesPerPacket = 1;
+    clientFormat.mBytesPerFrame = frameSize;
+    
+    status = ExtAudioFileSetProperty(audioFile, kExtAudioFileProperty_ClientDataFormat, sizeof(clientFormat), &clientFormat);
+    
+    // 後述するMyFFTクラスを使用
+    MyFFT* fft = [[MyFFT alloc] initWithCapacity:frameCount];
+    
+    while(true) {
+        float buf[channelCountPerFrame*frameCount];
+        AudioBuffer ab = { channelCountPerFrame, sizeof(buf), buf };
+        AudioBufferList audioBufferList;
+        audioBufferList.mNumberBuffers = 1;
+        audioBufferList.mBuffers[0] = ab;
+        
+        UInt32 processedFrameCount = frameCount;
+        status = ExtAudioFileRead(audioFile, &processedFrameCount, &audioBufferList);
+        
+        if(processedFrameCount == 0){
+            break;
+        } else {
+            [fft process:buf];
+        }
+    }
+    
+    float vdist[frameCount - 1];
+    vDSP_vdist([fft realp], 1, [fft imagp], 1, vdist, 1, frameCount);
+    
+    for (int i = 0; i <= frameCount - 1; i++) {
+        NSLog(@"[%d] %.2f", i, vdist[i]);
+    }
+
+    
+    status = ExtAudioFileDispose(audioFile);
 }
 
 @end
