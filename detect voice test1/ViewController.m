@@ -256,7 +256,7 @@ static void AudioInputCallback(
     
     float bin = clientFormat.mSampleRate / frameCount;
 //    float threshold = max*4/10;
-    float threshold_db = 30.0; // 30...silent, 40...normal, 50...loud, 60+...too loud
+    float threshold_db = 40.0; // 30...silent, 40...normal, 50...loud, 60+...too loud
     
     NSMutableArray *c_magniDic = [[NSMutableArray array] init];
     NSMutableArray *w_magniDic = [[NSMutableArray array] init];
