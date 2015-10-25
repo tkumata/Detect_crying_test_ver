@@ -16,6 +16,13 @@
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *loudLabel;
+
+@property (weak, nonatomic) IBOutlet UILabel *babyActLabel;
+@property (weak, nonatomic) IBOutlet UILabel *manActLabel;
+@property (weak, nonatomic) IBOutlet UILabel *otherActLabel;
+
+@property (weak, nonatomic) IBOutlet UILabel *maxLabel;
+
 @property (weak, nonatomic) IBOutlet UITextField *peakTextField;
 @property (weak, nonatomic) IBOutlet UITextField *averageTextField;
 

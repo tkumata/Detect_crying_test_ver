@@ -39,7 +39,7 @@
         NSLog(@"capacity: %d n: %d", capacity, capacityN);
         
         // FFTの設定をします
-        fftSetup = vDSP_create_fftsetup(capacityN+1, FFT_RADIX2);
+        fftSetup = vDSP_create_fftsetup(capacityN + 1, FFT_RADIX2);
         
         // FFTに使う配列を用意します
         splitComplex.realp = calloc(capacity, sizeof(float));
@@ -61,13 +61,14 @@
     vDSP_vmul(input, 1, window, 1, windowedInput, 1, capacity);
     
     // 複素数に変換します
-    for (int i=0; i<capacity; i++) {
+    for (int i=0; i < capacity; i++) {
         splitComplex.realp[i] = windowedInput[i];
         splitComplex.imagp[i] = 0.0f;
     }
     
     // フーリエ変換します
-    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN+1, FFT_FORWARD);
+    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN + 1, FFT_FORWARD);
+//    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN, FFT_FORWARD);
     
 //    for (int i = 0; i <= capacity/2; i++) {
 //        float real = splitComplex.realp[i];

@@ -16,7 +16,7 @@
 //
 
 #import <UIKit/UIKit.h>
-//#import <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 
 @interface MyFFT : NSObject {
