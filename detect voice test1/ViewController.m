@@ -118,7 +118,7 @@ static void AudioInputCallback(
     self.averageTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mAveragePower];
     
     // mPeakPower larger than -10.0 stop timer and start recording.
-    if (levelMeter.mPeakPower >= -7.0f) {
+    if (levelMeter.mPeakPower >= -10.0f) {
         [_timer invalidate];
         
         [self record];
@@ -178,7 +178,10 @@ static void AudioInputCallback(
 
 // 録音が終わったら呼ばれるメソッド
 - (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag {
+#if DEBUG
     NSLog(@"%@", @"Finish recording.");
+#endif
+    
     [self process];
 //    [self play];
 }
@@ -229,7 +232,7 @@ static void AudioInputCallback(
     
     AudioStreamBasicDescription clientFormat;
     clientFormat.mChannelsPerFrame = channelCountPerFrame;
-    clientFormat.mSampleRate = 44100.f;
+    clientFormat.mSampleRate = 44100.0f;
     clientFormat.mFormatID = kAudioFormatLinearPCM;
     clientFormat.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved;
     int cmpSize = sizeof(float);
@@ -307,7 +310,9 @@ static void AudioInputCallback(
                 else if (hz > 300 && hz < 600)
                 {
                     [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-//                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
+#if DEBUG
+                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
+#endif
                 }
             }
         }
@@ -374,11 +379,14 @@ static void AudioInputCallback(
             c_Loop++;
         }
     }
-    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_Loop);
     
     // Magnitude for Max value and AVG value
-    NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
+    
+#if DEBUG
+    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_Loop);
+    NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
+#endif
     
     // MARK: Maybe, baby is crying near.
     if (c_db == max_db && c_Loop >= 7) {
