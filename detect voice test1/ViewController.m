@@ -11,6 +11,10 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import "MyFFT.h"
 
+#define SAMPLE_RATE 44100.0f
+#define REC_TIME 4.0f
+#define LEVEL_PEAK -10.0f
+
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
     
@@ -71,7 +75,7 @@ static void AudioInputCallback(
 - (void)startUpdatingVolume {
     // 記録するデータフォーマットを決める
     AudioStreamBasicDescription dataFormat;
-    dataFormat.mSampleRate = 44100.0f;
+    dataFormat.mSampleRate = SAMPLE_RATE;
     dataFormat.mFormatID = kAudioFormatLinearPCM;
     dataFormat.mFormatFlags = kLinearPCMFormatFlagIsBigEndian | kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
     dataFormat.mBytesPerPacket = 2;
@@ -117,7 +121,7 @@ static void AudioInputCallback(
     self.averageTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mAveragePower];
     
     // mPeakPower larger than -10.0 stop timer and start recording.
-    if (levelMeter.mPeakPower >= -10.0f) {
+    if (levelMeter.mPeakPower >= LEVEL_PEAK) {
         // Stop timer
         [_timer invalidate];
         
@@ -136,7 +140,7 @@ static void AudioInputCallback(
     // Recording settings parameter
     NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
     [settings setValue:[NSNumber numberWithInt:kAudioFormatLinearPCM] forKey:AVFormatIDKey];
-    [settings setValue:[NSNumber numberWithFloat:44100.0f] forKey:AVSampleRateKey];
+    [settings setValue:[NSNumber numberWithFloat:SAMPLE_RATE] forKey:AVSampleRateKey];
     [settings setValue:[NSNumber numberWithInt:2] forKey:AVNumberOfChannelsKey];
     [settings setValue:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
     [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsBigEndianKey];
@@ -155,7 +159,7 @@ static void AudioInputCallback(
     
     // Start recording
     self.loudLabel.text = @"Recording";
-    [avRecorder recordForDuration:4.0];
+    [avRecorder recordForDuration:REC_TIME];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -201,7 +205,7 @@ static void AudioInputCallback(
     
     AudioStreamBasicDescription clientFormat;
     clientFormat.mChannelsPerFrame = channelCountPerFrame;
-    clientFormat.mSampleRate = 44100.0f;
+    clientFormat.mSampleRate = SAMPLE_RATE;
     clientFormat.mFormatID = kAudioFormatLinearPCM;
     clientFormat.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved;
     int cmpSize = sizeof(float);
@@ -358,7 +362,7 @@ static void AudioInputCallback(
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (c_db == max_db && c_Loop >= 7) {
+    if (c_db == max_db && c_Loop >= 6) {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:63.0];
         
         // Play sound
