@@ -67,8 +67,8 @@
     }
     
     // フーリエ変換します
-    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN + 1, FFT_FORWARD);
-//    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN, FFT_FORWARD);
+//    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN + 1, FFT_FORWARD);
+    vDSP_fft_zrip(fftSetup, &splitComplex, 1, capacityN, FFT_FORWARD);
     
 //    for (int i = 0; i <= capacity/2; i++) {
 //        float real = splitComplex.realp[i];

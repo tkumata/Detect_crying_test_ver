@@ -14,6 +14,8 @@
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
     AVAudioPlayer *avPlayer;
+    
+    NSMutableDictionary *_dictPlayers;
 }
 
 @end
@@ -44,6 +46,25 @@ static void AudioInputCallback(
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark Sound Method
+
+- (void)playSound:(NSString *)soundName loop:(NSInteger)loop {
+    NSString *soundPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:soundName];
+    NSURL *urlOfSound = [NSURL fileURLWithPath:soundPath];
+    AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:urlOfSound error:nil];
+    [player setNumberOfLoops:loop];
+    player.delegate = (id)self;
+    [player prepareToPlay];
+    if (_dictPlayers == nil) _dictPlayers = [NSMutableDictionary dictionary];
+    [_dictPlayers setObject:player forKey:[[player.url path] lastPathComponent]];
+    player.volume = 1.0;
+    [player play];
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+    [_dictPlayers removeObjectForKey:[[player.url path] lastPathComponent]];
 }
 
 #pragma mark Meter
@@ -78,26 +99,26 @@ static void AudioInputCallback(
 }
 
 - (void)stopUpdatingVolume {
-    // キューを空にして停止
+    // Empty queue and stop Volume method
     AudioQueueFlush(_queue);
     AudioQueueStop(_queue, NO);
     AudioQueueDispose(_queue, YES);
 }
 
+// MARK: detect volume
 - (void)detectVolume:(NSTimer *)timer {
-    // レベルを取得
+    // Get mic level
     AudioQueueLevelMeterState levelMeter;
     UInt32 levelMeterSize = sizeof(AudioQueueLevelMeterState);
     AudioQueueGetProperty(_queue, kAudioQueueProperty_CurrentLevelMeterDB, &levelMeter, &levelMeterSize);
     
-    // 最大レベル、平均レベルを表示
+    // Display each level
     self.loudLabel.text = @"Hearing";
     self.peakTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mPeakPower];
     self.averageTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mAveragePower];
     
-    // mPeakPowerが -1.0 以上なら "LOUD!!" と表示
-//    self.loudLabel.hidden = (levelMeter.mPeakPower >= -1.0f) ? NO : YES;
-    if (levelMeter.mPeakPower >= -10.0f) {
+    // mPeakPower larger than -10.0 stop timer and start recording.
+    if (levelMeter.mPeakPower >= -7.0f) {
         [_timer invalidate];
         
         [self record];
@@ -111,23 +132,23 @@ static void AudioInputCallback(
     NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
     NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
     
-//    NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-//    [settings setValue:[NSNumber numberWithInt:kAudioFormatLinearPCM] forKey:AVFormatIDKey];
-//    [settings setValue:[NSNumber numberWithFloat:44100.0f] forKey:AVSampleRateKey];
-//    [settings setValue:[NSNumber numberWithInt:1] forKey:AVNumberOfChannelsKey];
-//    [settings setValue:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
-//    [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsBigEndianKey];
-//    [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsFloatKey];
+    NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
+    [settings setValue:[NSNumber numberWithInt:kAudioFormatLinearPCM] forKey:AVFormatIDKey];
+    [settings setValue:[NSNumber numberWithFloat:44100.0f] forKey:AVSampleRateKey];
+    [settings setValue:[NSNumber numberWithInt:2] forKey:AVNumberOfChannelsKey];
+    [settings setValue:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
+    [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsBigEndianKey];
+    [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsFloatKey];
     
     // 録音の設定 AVNumberOfChannelsKey チャンネル数1
-    NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSNumber numberWithFloat:44100.0f], AVSampleRateKey,
-                              [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
-                              [NSNumber numberWithInt:1], AVNumberOfChannelsKey,
-                              [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
-                              [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
-                              [NSNumber numberWithBool:NO], AVLinearPCMIsFloatKey,
-                              nil];
+//    NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
+//                              [NSNumber numberWithFloat:44100.0f], AVSampleRateKey,
+//                              [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+//                              [NSNumber numberWithInt:1], AVNumberOfChannelsKey,
+//                              [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
+//                              [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
+//                              [NSNumber numberWithBool:NO], AVLinearPCMIsFloatKey,
+//                              nil];
     
     // インスタンス生成(エラー処理は省略)
     NSError *error = nil;
@@ -140,7 +161,7 @@ static void AudioInputCallback(
     // 録音中に音量をとるかどうか
     avRecorder.meteringEnabled = YES;
     
-    // 録音開始
+    // Start recording
 //    [recorder record];
     self.loudLabel.text = @"Recording";
     [avRecorder recordForDuration:4.0];
@@ -152,7 +173,7 @@ static void AudioInputCallback(
     [self stopUpdatingVolume];
     
     // 録音データの削除。stop メソッドを呼ぶ前に呼んではいけない
-    [avRecorder deleteRecording];
+//    [avRecorder deleteRecording];
 }
 
 // 録音が終わったら呼ばれるメソッド
@@ -223,6 +244,24 @@ static void AudioInputCallback(
     // 後述するMyFFTクラスを使用
     MyFFT* fft = [[MyFFT alloc] initWithCapacity:frameCount];
     
+    // magnitude vector array
+    float vdist[frameCount];
+    
+    // magnitude scalar array for each frequency
+    NSMutableArray *c_magniDic = [[NSMutableArray array] init];
+    NSMutableArray *w_magniDic = [[NSMutableArray array] init];
+    NSMutableArray *s_magniDic = [[NSMutableArray array] init];
+    
+    // bin width
+    float bin = clientFormat.mSampleRate / frameCount;
+    
+    // max value of magnitude
+    float max = 0.0;
+    float prevmax = 0.0;
+
+    // average of magnitude
+    float avg[178176];
+    
     while (true) {
         float buf[channelCountPerFrame*frameCount];
         AudioBuffer ab = { channelCountPerFrame, sizeof(buf), buf };
@@ -236,60 +275,69 @@ static void AudioInputCallback(
         if (processedFrameCount == 0) {
             break;
         } else {
+            // Calc FFT
             [fft process:buf];
+            
+            // Get magnitude in buffer
+            vDSP_vdist([fft realp], 1, [fft imagp], 1, vdist, 1, frameCount);
+            
+            // Get max magnitude in buffer and add to array
+            vDSP_maxv(vdist, 1, &max, frameCount);
+            if (max > prevmax) {
+                prevmax = max;
+            }
+            
+            // Get avg magnitude in buffer and add to array
+            vDSP_meanv(vdist, 1, avg, frameCount);
+            
+            // Separate some frequenct domain
+            for (int i = 0; i < frameCount/2; i++) {
+                float hz = i * bin;
+                
+                if (hz > 2000 && hz < 4000)
+                {
+                    [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                }
+                else if (hz > 800 && hz < 1000)
+                {
+                    [w_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                }
+                else if (hz > 300 && hz < 600)
+                {
+                    [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+//                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
+                }
+            }
         }
     }
     
-    // magnitude
-    float vdist[frameCount];
-    vDSP_vdist([fft realp], 1, [fft imagp], 1, vdist, 1, frameCount);
+    // MARK: Calc max magnitude [dB]
+    float max_db = 20*log(prevmax);
     
-    // max value of magnitude
-    float max;
-    vDSP_maxv(vdist, 1, &max, frameCount);
-    float max_db = 20*log(max);
+    // MARK: Calc avg magnitude [dB]
+    NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
+    id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
+    float avg_db = 20*log([avgValue floatValue]);
     
-    // average of magnitude
-    float avg;
-    vDSP_meanv(vdist, 1, &avg, frameCount);
-    float avg_db = 20*log(avg);
-    
-    float bin = clientFormat.mSampleRate / frameCount;
-//    float threshold = max*4/10;
-    float threshold_db = 40.0; // 30...silent, 40...normal, 50...loud, 60+...too loud
-    
-    NSMutableArray *c_magniDic = [[NSMutableArray array] init];
-    NSMutableArray *w_magniDic = [[NSMutableArray array] init];
-    NSMutableArray *s_magniDic = [[NSMutableArray array] init];
-    
-    for (int i = 0; i < frameCount/2; i++) {
-        float hz = i * bin;
-        
-//        NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
-        
-        if (hz > 2000 && hz < 4000)
-        {
-            [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-        }
-        else if (hz > 800 && hz < 1000)
-        {
-            [w_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-        }
-        else if (hz > 400 && hz < 800)
-        {
-            [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-        }
-    }
+    // MARK: Decide threshold [dB]
+    // 30 ... silent
+    // 40 ... normal
+    // 50 ... loud
+    // 60+... too loud
+    float threshold_db_s = 40.0;
+    float threshold_db_w = 40.0;
+    float threshold_db_c = 50.0;
     
     status = ExtAudioFileDispose(audioFile);
     
+    // MARK: Calc each max value [dB]
     // calc max value
     NSExpression *s_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
     id s_maxValue = [s_maxExpression expressionValueWithObject:nil context:nil];
     float s_db = 20*log([s_maxValue floatValue]);
     
-    if (s_db > threshold_db) {
-        self.manActLabel.text = [NSString stringWithFormat:@"400-800 Hz: %.2f dB", s_db];
+    if (s_db > threshold_db_s) {
+        self.manActLabel.text = [NSString stringWithFormat:@"300-600 Hz: %.2f dB", s_db];
     } else {
         self.manActLabel.text = @"---";
     }
@@ -299,33 +347,50 @@ static void AudioInputCallback(
     id w_maxValue = [w_maxExpression expressionValueWithObject:nil context:nil];
     float w_db = 20*log([w_maxValue floatValue]);
     
-    if (w_db > threshold_db) {
+    if (w_db > threshold_db_w) {
         self.otherActLabel.text = [NSString stringWithFormat:@"800-1000 Hz: %.2f dB", w_db];
     } else {
         self.otherActLabel.text = @"---";
     }
     
-    // calc max value
+    // calc max value for crying
     NSExpression *c_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:c_magniDic]]];
     id c_maxValue = [c_maxExpression expressionValueWithObject:nil context:nil];
     float c_db = 20*log([c_maxValue floatValue]);
     
-    if (c_db > threshold_db) {
+    if (c_db > threshold_db_c) {
         self.babyActLabel.text = [NSString stringWithFormat:@"2000-4000 Hz: %.2f dB", c_db];
     } else {
         self.babyActLabel.text = @"---";
     }
     
-//    NSLog(@"max: M%.2f avg: M%.2f", max, avg);
+    // MARK: Count times for near max value
+    int loop_c = 0;
+    for (id a in c_magniDic) {
+        float b = 20*log([a floatValue]);
+        if (b >= max_db - 5) {
+            loop_c++;
+        }
+    }
+    NSLog(@"All c_magnitude: %d / over max: %d", [c_magniDic count], loop_c);
+    
+    // Magnitude for Max value and AVG value
+    NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
     
     // if c_maxValue == max, baby cry near.
-    if (c_db == max_db) {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:180.0];
+    if (c_db == max_db && loop_c >= 7) {
+        NSLog(@"Maybe, baby is crying in near.");
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:63.0];
+        
+        // Play sound
+        [self playSound:@"Water.mp3" loop:3];
     } else {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:10.0];
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:1.0];
     }
 }
+
+#pragma  mark Restart timer method
 
 - (void)restartTimer:(int)t {
     // Timer again

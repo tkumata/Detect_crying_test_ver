@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
 		89A1FC1E1BD74B2800367C77 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC1D1BD74B2800367C77 /* main.m */; };
 		89A1FC211BD74B2800367C77 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC201BD74B2800367C77 /* AppDelegate.m */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		89A1FC191BD74B2800367C77 /* detect voice test1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "detect voice test1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		89A1FC1D1BD74B2800367C77 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -51,6 +53,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		898FE55F1BDF65D500234C93 /* sounds */ = {
+			isa = PBXGroup;
+			children = (
+				898FE5601BDF65E800234C93 /* Water.mp3 */,
+			);
+			path = sounds;
+			sourceTree = "<group>";
+		};
 		89A1FC101BD74B2800367C77 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +89,7 @@
 				89A1FC231BD74B2800367C77 /* ViewController.m */,
 				89C03D1F1BD8B05C0009838B /* MyFFT.h */,
 				89C03D201BD8B0C10009838B /* MyFFT.m */,
+				898FE55F1BDF65D500234C93 /* sounds */,
 				89A1FC251BD74B2800367C77 /* Main.storyboard */,
 				89A1FC281BD74B2800367C77 /* Assets.xcassets */,
 				89A1FC2A1BD74B2800367C77 /* LaunchScreen.storyboard */,
@@ -159,6 +170,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				898FE5611BDF65E800234C93 /* Water.mp3 in Resources */,
 				89A1FC2C1BD74B2800367C77 /* LaunchScreen.storyboard in Resources */,
 				89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */,
 				89A1FC271BD74B2800367C77 /* Main.storyboard in Resources */,
