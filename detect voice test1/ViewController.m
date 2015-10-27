@@ -251,6 +251,7 @@ static void AudioInputCallback(
     NSMutableArray *c_magniDic = [[NSMutableArray array] init];
     NSMutableArray *w_magniDic = [[NSMutableArray array] init];
     NSMutableArray *s_magniDic = [[NSMutableArray array] init];
+    NSMutableArray *avgDic = [[NSMutableArray array] init];
     
     // bin width
     float bin = clientFormat.mSampleRate / frameCount;
@@ -260,7 +261,7 @@ static void AudioInputCallback(
     float prevmax = 0.0;
 
     // average of magnitude
-    float avg[178176];
+    float avg = 0.0;
     
     while (true) {
         float buf[channelCountPerFrame*frameCount];
@@ -288,7 +289,8 @@ static void AudioInputCallback(
             }
             
             // Get avg magnitude in buffer and add to array
-            vDSP_meanv(vdist, 1, avg, frameCount);
+            vDSP_meanv(vdist, 1, &avg, frameCount);
+            [avgDic addObject:[NSNumber numberWithFloat:avg]];
             
             // Separate some frequenct domain
             for (int i = 0; i < frameCount/2; i++) {
@@ -315,7 +317,7 @@ static void AudioInputCallback(
     float max_db = 20*log(prevmax);
     
     // MARK: Calc avg magnitude [dB]
-    NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
+    NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:avgDic]]];
     id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
     float avg_db = 20*log([avgValue floatValue]);
     
@@ -365,28 +367,27 @@ static void AudioInputCallback(
     }
     
     // MARK: Count times for near max value
-    int loop_c = 0;
-    for (id a in c_magniDic) {
-        float b = 20*log([a floatValue]);
-        if (b >= max_db - 5) {
-            loop_c++;
+    int c_Loop = 0;
+    for (id c_all_magni in c_magniDic) {
+        float c_all_dB = 20*log([c_all_magni floatValue]);
+        if (c_all_dB >= max_db - 5) {
+            c_Loop++;
         }
     }
-    NSLog(@"All c_magnitude: %d / over max: %d", [c_magniDic count], loop_c);
+    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_Loop);
     
     // Magnitude for Max value and AVG value
     NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
     
-    // if c_maxValue == max, baby cry near.
-    if (c_db == max_db && loop_c >= 7) {
-        NSLog(@"Maybe, baby is crying in near.");
+    // MARK: Maybe, baby is crying near.
+    if (c_db == max_db && c_Loop >= 7) {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:63.0];
         
         // Play sound
         [self playSound:@"Water.mp3" loop:3];
     } else {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:1.0];
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:5.0];
     }
 }
 
