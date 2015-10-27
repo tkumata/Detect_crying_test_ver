@@ -13,7 +13,6 @@
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
-    AVAudioPlayer *avPlayer;
     
     NSMutableDictionary *_dictPlayers;
 }
@@ -119,8 +118,10 @@ static void AudioInputCallback(
     
     // mPeakPower larger than -10.0 stop timer and start recording.
     if (levelMeter.mPeakPower >= -10.0f) {
+        // Stop timer
         [_timer invalidate];
         
+        // Start recording
         [self record];
     }
 }
@@ -132,6 +133,7 @@ static void AudioInputCallback(
     NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
     NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
     
+    // Recording settings parameter
     NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
     [settings setValue:[NSNumber numberWithInt:kAudioFormatLinearPCM] forKey:AVFormatIDKey];
     [settings setValue:[NSNumber numberWithFloat:44100.0f] forKey:AVSampleRateKey];
@@ -139,16 +141,6 @@ static void AudioInputCallback(
     [settings setValue:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
     [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsBigEndianKey];
     [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsFloatKey];
-    
-    // 録音の設定 AVNumberOfChannelsKey チャンネル数1
-//    NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
-//                              [NSNumber numberWithFloat:44100.0f], AVSampleRateKey,
-//                              [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
-//                              [NSNumber numberWithInt:1], AVNumberOfChannelsKey,
-//                              [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
-//                              [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
-//                              [NSNumber numberWithBool:NO], AVLinearPCMIsFloatKey,
-//                              nil];
     
     // インスタンス生成(エラー処理は省略)
     NSError *error = nil;
@@ -162,7 +154,6 @@ static void AudioInputCallback(
     avRecorder.meteringEnabled = YES;
     
     // Start recording
-//    [recorder record];
     self.loudLabel.text = @"Recording";
     [avRecorder recordForDuration:4.0];
 }
@@ -183,32 +174,10 @@ static void AudioInputCallback(
 #endif
     
     [self process];
-//    [self play];
 }
 
 - (void)dealloc {
     avRecorder.delegate = nil;
-}
-
-#pragma Play recorded file
-
-- (void)play {
-    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:AVAudioSessionCategoryAmbient error:nil];
-    
-    // 録音ファイルパス
-//    NSArray *filePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//    NSString *documentDir = [filePaths objectAtIndex:0];
-//    NSString *path = [documentDir stringByAppendingPathComponent:@"audio.caf"];
-    NSString *path = [NSString stringWithFormat:@"%@/audio.caf", DocumentsFolder];
-    NSURL *recordingURL = [NSURL fileURLWithPath:path];
-    
-    //再生
-    avPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:recordingURL error:nil];
-    avPlayer.delegate = self;
-    avPlayer.volume = 1.0;
-    [avPlayer play];
-//    [self processFFT];
 }
 
 #pragma mark FFT
