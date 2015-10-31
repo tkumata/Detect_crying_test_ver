@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 89666D541BE463C100FF0DDC /* QPTarako.mp3 */; };
 		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
 		89A1FC1E1BD74B2800367C77 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC1D1BD74B2800367C77 /* main.m */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		89666D541BE463C100FF0DDC /* QPTarako.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = QPTarako.mp3; sourceTree = "<group>"; };
 		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		89A1FC191BD74B2800367C77 /* detect voice test1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "detect voice test1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +58,7 @@
 		898FE55F1BDF65D500234C93 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				89666D541BE463C100FF0DDC /* QPTarako.mp3 */,
 				898FE5601BDF65E800234C93 /* Water.mp3 */,
 			);
 			path = sounds;
@@ -174,6 +177,7 @@
 				89A1FC2C1BD74B2800367C77 /* LaunchScreen.storyboard in Resources */,
 				89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */,
 				89A1FC271BD74B2800367C77 /* Main.storyboard in Resources */,
+				89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

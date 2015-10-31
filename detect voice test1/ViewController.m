@@ -200,7 +200,7 @@ static void AudioInputCallback(
     
     status = ExtAudioFileOpenURL(cfurl, &audioFile);
     
-    const UInt32 frameCount = 1024;
+    const UInt32 frameCount = 4096;
     const int channelCountPerFrame = 1;
     
     AudioStreamBasicDescription clientFormat;
@@ -366,7 +366,7 @@ static void AudioInputCallback(
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:63.0];
         
         // Play sound
-        [self playSound:@"Water.mp3" loop:3];
+        [self playSound:@"QPTarako.mp3" loop:3];
     } else {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:5.0];
     }
