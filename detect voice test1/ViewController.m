@@ -13,7 +13,10 @@
 
 #define SAMPLE_RATE 44100.0f
 #define REC_TIME 4.0f
-#define LEVEL_PEAK -10.0f
+#define LEVEL_PEAK -15.0f
+#define s_FREQ @"300-600"
+#define w_FREQ @"800-1000"
+#define c_FREQ @"2000-4000"
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -317,9 +320,9 @@ static void AudioInputCallback(
     float s_db = 20*log([s_maxValue floatValue]);
     
     if (s_db > threshold_db_s) {
-        self.manActLabel.text = [NSString stringWithFormat:@"300-600 Hz: %.2f dB", s_db];
+        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", s_FREQ, s_db];
     } else {
-        self.manActLabel.text = @"---";
+        self.manActLabel.text = s_FREQ;
     }
     
     // calc max value
@@ -328,9 +331,9 @@ static void AudioInputCallback(
     float w_db = 20*log([w_maxValue floatValue]);
     
     if (w_db > threshold_db_w) {
-        self.otherActLabel.text = [NSString stringWithFormat:@"800-1000 Hz: %.2f dB", w_db];
+        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", w_FREQ, w_db];
     } else {
-        self.otherActLabel.text = @"---";
+        self.otherActLabel.text = w_FREQ;
     }
     
     // calc max value for crying
@@ -339,9 +342,9 @@ static void AudioInputCallback(
     float c_db = 20*log([c_maxValue floatValue]);
     
     if (c_db > threshold_db_c) {
-        self.babyActLabel.text = [NSString stringWithFormat:@"2000-4000 Hz: %.2f dB", c_db];
+        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", c_FREQ, c_db];
     } else {
-        self.babyActLabel.text = @"---";
+        self.babyActLabel.text = c_FREQ;
     }
     
     // MARK: Count times for near max value
@@ -355,7 +358,6 @@ static void AudioInputCallback(
     
     // Magnitude for Max value and AVG value
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
-    
 #if DEBUG
     NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_Loop);
     NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
@@ -363,10 +365,10 @@ static void AudioInputCallback(
     
     // MARK: Maybe, baby is crying near.
     if (c_db == max_db && c_Loop >= 6) {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:63.0];
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
         // Play sound
-        [self playSound:@"QPTarako.mp3" loop:3];
+        [self playSound:@"QPTarako.mp3" loop:0];
     } else {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:5.0];
     }
