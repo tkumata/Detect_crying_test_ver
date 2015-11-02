@@ -12,11 +12,19 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 4.0f
+#define REC_TIME 3.0f
 #define LEVEL_PEAK -15.0f
 #define s_FREQ @"300-600"
 #define w_FREQ @"800-1000"
 #define c_FREQ @"2000-4000"
+
+// MARK: Decide threshold [dB]
+// 30 ... silent
+// 40 ... normal
+// 50 ... loud
+// 60+... too loud
+#define CRY_THRESHOLD 50.0
+#define NORMAL_THRESHOLD 40.0
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -39,7 +47,6 @@ static void AudioInputCallback(
                                UInt32 inNumberPacketDescriptions,
                                const AudioStreamPacketDescription *inPacketDescs)
 {
-    // 録音はしないので未実装
 }
 
 - (void)viewDidLoad {
@@ -65,7 +72,7 @@ static void AudioInputCallback(
     [player prepareToPlay];
     if (_dictPlayers == nil) _dictPlayers = [NSMutableDictionary dictionary];
     [_dictPlayers setObject:player forKey:[[player.url path] lastPathComponent]];
-    player.volume = 1.0;
+    player.volume = 0.7;
     [player play];
 }
 
@@ -76,7 +83,7 @@ static void AudioInputCallback(
 #pragma mark Meter
 
 - (void)startUpdatingVolume {
-    // 記録するデータフォーマットを決める
+    // audio format
     AudioStreamBasicDescription dataFormat;
     dataFormat.mSampleRate = SAMPLE_RATE;
     dataFormat.mFormatID = kAudioFormatLinearPCM;
@@ -88,15 +95,15 @@ static void AudioInputCallback(
     dataFormat.mBitsPerChannel = 16;
     dataFormat.mReserved = 0;
     
-    // レベルの監視を開始する
+    // start queue
     AudioQueueNewInput(&dataFormat, AudioInputCallback, (__bridge void *)(self), CFRunLoopGetCurrent(), kCFRunLoopCommonModes, 0, &_queue);
     AudioQueueStart(_queue, NULL);
     
-    // レベルメータを有効化する
+    // enable level meter
     UInt32 enabledLevelMeter = true;
     AudioQueueSetProperty(_queue, kAudioQueueProperty_EnableLevelMetering, &enabledLevelMeter, sizeof(UInt32));
     
-    // 定期的にレベルメータを監視する
+    // timer for level meter
     _timer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                               target:self
                                             selector:@selector(detectVolume:)
@@ -149,7 +156,7 @@ static void AudioInputCallback(
     [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsBigEndianKey];
     [settings setValue:[NSNumber numberWithBool:NO] forKey:AVLinearPCMIsFloatKey];
     
-    // インスタンス生成(エラー処理は省略)
+    // create instance for recording
     NSError *error = nil;
     avRecorder = [[AVAudioRecorder alloc] initWithURL:url settings:settings error:&error];
     avRecorder.delegate = self;
@@ -157,21 +164,18 @@ static void AudioInputCallback(
     // 録音ファイルの準備(すでにファイルが存在していれば上書きしてくれる)
     [avRecorder prepareToRecord];
     
-    // 録音中に音量をとるかどうか
-    avRecorder.meteringEnabled = YES;
-    
     // Start recording
     self.loudLabel.text = @"Recording";
     [avRecorder recordForDuration:REC_TIME];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-    // 録音終了
+    // finish recording
     [avRecorder stop];
     [self stopUpdatingVolume];
     
-    // 録音データの削除。stop メソッドを呼ぶ前に呼んではいけない
-//    [avRecorder deleteRecording];
+    // remove recording data. DONOT call before stop method.
+    //[avRecorder deleteRecording];
 }
 
 // 録音が終わったら呼ばれるメソッド
@@ -275,15 +279,15 @@ static void AudioInputCallback(
             for (int i = 0; i < frameCount/2; i++) {
                 float hz = i * bin;
                 
-                if (hz > 2000 && hz < 4000)
+                if (hz > (2000.0 - bin) && hz < (4000.0 + bin))
                 {
                     [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
-                else if (hz > 800 && hz < 1000)
+                else if (hz > 800.0 && hz < 1000.0)
                 {
                     [w_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
-                else if (hz > 300 && hz < 600)
+                else if (hz > 300.0 && hz < 600.0)
                 {
                     [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
 #if DEBUG
@@ -302,75 +306,66 @@ static void AudioInputCallback(
     id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
     float avg_db = 20*log([avgValue floatValue]);
     
-    // MARK: Decide threshold [dB]
-    // 30 ... silent
-    // 40 ... normal
-    // 50 ... loud
-    // 60+... too loud
-    float threshold_db_s = 40.0;
-    float threshold_db_w = 40.0;
-    float threshold_db_c = 50.0;
-    
     status = ExtAudioFileDispose(audioFile);
     
     // MARK: Calc each max value [dB]
-    // calc max value
+    // calc max value for 300-600 Hz
     NSExpression *s_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
     id s_maxValue = [s_maxExpression expressionValueWithObject:nil context:nil];
     float s_db = 20*log([s_maxValue floatValue]);
     
-    if (s_db > threshold_db_s) {
+    if (s_db > NORMAL_THRESHOLD) {
         self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", s_FREQ, s_db];
     } else {
         self.manActLabel.text = s_FREQ;
     }
     
-    // calc max value
+    // calc max value for 800-1000 Hz
     NSExpression *w_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:w_magniDic]]];
     id w_maxValue = [w_maxExpression expressionValueWithObject:nil context:nil];
     float w_db = 20*log([w_maxValue floatValue]);
     
-    if (w_db > threshold_db_w) {
+    if (w_db > NORMAL_THRESHOLD) {
         self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", w_FREQ, w_db];
     } else {
         self.otherActLabel.text = w_FREQ;
     }
     
-    // calc max value for crying
+    // calc max value for crying (2000-4000 Hz)
     NSExpression *c_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:c_magniDic]]];
     id c_maxValue = [c_maxExpression expressionValueWithObject:nil context:nil];
     float c_db = 20*log([c_maxValue floatValue]);
     
-    if (c_db > threshold_db_c) {
+    if (c_db > CRY_THRESHOLD) {
         self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", c_FREQ, c_db];
     } else {
         self.babyActLabel.text = c_FREQ;
     }
     
-    // MARK: Count times for near max value
-    int c_Loop = 0;
-    for (id c_all_magni in c_magniDic) {
-        float c_all_dB = 20*log([c_all_magni floatValue]);
-        if (c_all_dB >= max_db - 5) {
-            c_Loop++;
+    // MARK: Count high frequency
+    int c_count = 0;
+    for (id c_all_magni_each_bin in c_magniDic) {
+        float c_all_db_each_bin = 20*log([c_all_magni_each_bin floatValue]);
+        if (c_all_db_each_bin >= CRY_THRESHOLD) {
+            c_count++;
         }
     }
     
     // Magnitude for Max value and AVG value
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
 #if DEBUG
-    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_Loop);
+    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_count);
     NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (c_db == max_db && c_Loop >= 6) {
+    if (c_count >= 5) {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
         // Play sound
         [self playSound:@"QPTarako.mp3" loop:0];
     } else {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:5.0];
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:1.0];
     }
 }
 
