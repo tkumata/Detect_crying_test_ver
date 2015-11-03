@@ -12,19 +12,15 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 3.0f
+#define REC_TIME 4.0f
 #define LEVEL_PEAK -15.0f
 #define s_FREQ @"300-600"
 #define w_FREQ @"800-1000"
 #define c_FREQ @"2000-4000"
 
 // MARK: Decide threshold [dB]
-// 30 ... silent
-// 40 ... normal
-// 50 ... loud
-// 60+... too loud
-#define CRY_THRESHOLD 50.0
-#define NORMAL_THRESHOLD 40.0
+#define CRY_THRESHOLD 80.0f
+#define NORMAL_THRESHOLD 60.0f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -130,7 +126,7 @@ static void AudioInputCallback(
     self.peakTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mPeakPower];
     self.averageTextField.text = [NSString stringWithFormat:@"%.2f", levelMeter.mAveragePower];
     
-    // mPeakPower larger than -10.0 stop timer and start recording.
+    // stop timer and start recording.
     if (levelMeter.mPeakPower >= LEVEL_PEAK) {
         // Stop timer
         [_timer invalidate];
@@ -175,7 +171,7 @@ static void AudioInputCallback(
     [self stopUpdatingVolume];
     
     // remove recording data. DONOT call before stop method.
-    //[avRecorder deleteRecording];
+    [avRecorder deleteRecording];
 }
 
 // 録音が終わったら呼ばれるメソッド
@@ -235,16 +231,21 @@ static void AudioInputCallback(
     NSMutableArray *w_magniDic = [[NSMutableArray array] init];
     NSMutableArray *s_magniDic = [[NSMutableArray array] init];
     NSMutableArray *avgDic = [[NSMutableArray array] init];
+    NSMutableArray *q_avgDic = [[NSMutableArray array] init];
     
     // bin width
     float bin = clientFormat.mSampleRate / frameCount;
     
     // max value of magnitude
     float max = 0.0;
-    float prevmax = 0.0;
+    float max_db_per_buff = 0.0;
 
     // average of magnitude
     float avg = 0.0;
+    
+    float prev_magni = 0.0;
+    float q = 0.0;
+    float q_hungry = 0.0;
     
     while (true) {
         float buf[channelCountPerFrame*frameCount];
@@ -267,8 +268,8 @@ static void AudioInputCallback(
             
             // Get max magnitude in buffer and add to array
             vDSP_maxv(vdist, 1, &max, frameCount);
-            if (max > prevmax) {
-                prevmax = max;
+            if (max > max_db_per_buff) {
+                max_db_per_buff = max;
             }
             
             // Get avg magnitude in buffer and add to array
@@ -282,6 +283,10 @@ static void AudioInputCallback(
                 if (hz > (2000.0 - bin) && hz < (4000.0 + bin))
                 {
                     [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                    
+                    q = prev_magni/vdist[i];
+                    [q_avgDic addObject:[NSNumber numberWithFloat:q]];
+                    prev_magni = vdist[i];
                 }
                 else if (hz > 800.0 && hz < 1000.0)
                 {
@@ -298,15 +303,20 @@ static void AudioInputCallback(
         }
     }
     
+    status = ExtAudioFileDispose(audioFile);
+    
     // MARK: Calc max magnitude [dB]
-    float max_db = 20*log(prevmax);
+    float max_db = 20*log(max_db_per_buff);
     
     // MARK: Calc avg magnitude [dB]
     NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:avgDic]]];
     id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
     float avg_db = 20*log([avgValue floatValue]);
     
-    status = ExtAudioFileDispose(audioFile);
+    // MARK: Calc avg 'q'
+    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q_avgDic]]];
+    id q_avgValue = [q_avgExpression expressionValueWithObject:nil context:nil];
+    q_hungry = [q_avgValue floatValue];
     
     // MARK: Calc each max value [dB]
     // calc max value for 300-600 Hz
@@ -346,25 +356,36 @@ static void AudioInputCallback(
     int c_count = 0;
     for (id c_all_magni_each_bin in c_magniDic) {
         float c_all_db_each_bin = 20*log([c_all_magni_each_bin floatValue]);
-        if (c_all_db_each_bin >= CRY_THRESHOLD) {
+        if (c_all_db_each_bin > CRY_THRESHOLD) {
             c_count++;
         }
     }
     
     // Magnitude for Max value and AVG value
-    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB", max_db, avg_db];
-#if DEBUG
-    NSLog(@"All c_magnitude: %lu / over max: %d", (unsigned long)[c_magniDic count], c_count);
-    NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
+    self.maxLabel.text = [NSString stringWithFormat:@"max:%.2fdB / avg:%.2fdB", max_db, avg_db];
+    
+#ifdef DEBUG
+    NSLog(@"All c_magnitude:%lu / over max:%d / q_hungry:%.2f", (unsigned long)[c_magniDic count], c_count, q_hungry);
+    NSLog(@"max:%.2fdB / avg:%.2fdB", max_db, avg_db);
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (c_count >= 5) {
+    if (c_count > 5 && (q_hungry > 6 && q_hungry < 10))
+    {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
         // Play sound
         [self playSound:@"QPTarako.mp3" loop:0];
-    } else {
+    }
+//#ifdef DEBUG
+//    else if (s_db > NORMAL_THRESHOLD)
+//    {
+//        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
+//        [self playSound:@"QPTarako.mp3" loop:0];
+//    }
+//#endif
+    else
+    {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:1.0];
     }
 }
