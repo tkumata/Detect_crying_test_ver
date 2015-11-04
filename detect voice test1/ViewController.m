@@ -286,9 +286,7 @@ static void AudioInputCallback(
             // Separate some frequenct domain
             for (int i = 0; i < frameCount/2; i++) {
                 float hz = i * bin;
-#if DEBUG
-//                NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
-#endif
+                
                 // MARK: Gather 'q' seed
                 if (hz > 1000.f && hz < 4000.f) {
                     q3ktmp = prev_magni3/vdist[i];
@@ -386,7 +384,6 @@ static void AudioInputCallback(
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k];
     
 #ifdef DEBUG
-//    NSLog(@"All c_magnitude:%lu / over max:%d", (unsigned long)[c_magniDic count], c_count);
     NSLog(@"max: %.2f dB / avg: %.2f dB / q3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k);
 #endif
     
@@ -398,13 +395,6 @@ static void AudioInputCallback(
         // Play sound
         [self playSound:@"QPTarako.mp3" loop:0];
     }
-//#ifdef DEBUG
-//    else if (s_db > NORMAL_THRESHOLD)
-//    {
-//        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
-//        [self playSound:@"QPTarako.mp3" loop:0];
-//    }
-//#endif
     else
     {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:1.0];
