@@ -13,7 +13,7 @@
 
 #define SAMPLE_RATE 44100.0f
 #define REC_TIME 3.0f
-#define LEVEL_PEAK -13.0f
+#define LEVEL_PEAK -15.0f
 #define s_FREQ @"300-699"
 #define w_FREQ @"800-999"
 #define c_FREQ @"2000-4999"
@@ -286,18 +286,24 @@ static void AudioInputCallback(
             // Separate some frequenct domain
             for (int i = 0; i < frameCount/2; i++) {
                 float hz = i * bin;
-                
-                if (hz > 2000.f && hz < 5000.f)
-                {
 #if DEBUG
-//                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
+//                NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
 #endif
-                    if (hz > 3000.f && hz < 4000.f) {
-                        q3ktmp = prev_magni3/vdist[i];
-                        [q3k_avgDic addObject:[NSNumber numberWithFloat:q3ktmp]];
-                        prev_magni3 = vdist[i];
-                    }
-                    
+                // MARK: Gather 'q' seed
+                if (hz > 1000.f && hz < 4000.f) {
+                    q3ktmp = prev_magni3/vdist[i];
+                    [q3k_avgDic addObject:[NSNumber numberWithFloat:q3ktmp]];
+                    prev_magni3 = vdist[i];
+                }
+                else if (hz > 4000.f && hz < 7000.f)
+                {
+                    q6ktmp = prev_magni6/vdist[i];
+                    [q6k_avgDic addObject:[NSNumber numberWithFloat:q6ktmp]];
+                    prev_magni6 = vdist[i];
+                }
+                
+                // MARK: Gather each frequency
+                if (hz > 2000.f && hz < 5000.f) {
                     [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
                 else if (hz > 800.f && hz < 1000.f)
@@ -307,12 +313,6 @@ static void AudioInputCallback(
                 else if (hz > 300.f && hz < 700.f)
                 {
                     [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-                }
-                else if (hz > 6000.f && hz < 7000.f)
-                {
-                    q6ktmp = prev_magni6/vdist[i];
-                    [q6k_avgDic addObject:[NSNumber numberWithFloat:q6ktmp]];
-                    prev_magni6 = vdist[i];
                 }
             }
         }
@@ -346,6 +346,9 @@ static void AudioInputCallback(
     float s_db = 20*log([s_maxValue floatValue]);
     
     if (s_db > NORMAL_THRESHOLD) {
+#ifdef DEBUG
+        NSLog(@"%@ Hz: %.2f dB", s_FREQ, s_db);
+#endif
         self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", s_FREQ, s_db];
     } else {
         self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz:", s_FREQ];
@@ -357,6 +360,9 @@ static void AudioInputCallback(
     float w_db = 20*log([w_maxValue floatValue]);
     
     if (w_db > NORMAL_THRESHOLD) {
+#ifdef DEBUG
+        NSLog(@"%@ Hz: %.2f dB", w_FREQ, w_db);
+#endif
         self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", w_FREQ, w_db];
     } else {
         self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz:", w_FREQ];
@@ -368,25 +374,28 @@ static void AudioInputCallback(
     float c_db = 20*log([c_maxValue floatValue]);
     
     if (c_db > CRY_THRESHOLD) {
+#ifdef DEBUG
+        NSLog(@"%@ Hz: %.2f dB", c_FREQ, c_db);
+#endif
         self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", c_FREQ, c_db];
     } else {
         self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz:", c_FREQ];
     }
     
     // MARK: Count high frequency
-    int c_count = 0;
-    for (id c_all_magni_each_bin in c_magniDic) {
-        float c_all_db_each_bin = 20*log([c_all_magni_each_bin floatValue]);
-        if (c_all_db_each_bin > CRY_THRESHOLD) {
-            c_count++;
-        }
-    }
+//    int c_count = 0;
+//    for (id c_all_magni_each_bin in c_magniDic) {
+//        float c_all_db_each_bin = 20*log([c_all_magni_each_bin floatValue]);
+//        if (c_all_db_each_bin > CRY_THRESHOLD) {
+//            c_count++;
+//        }
+//    }
     
     // Magnitude for Max value and AVG value
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k];
     
 #ifdef DEBUG
-    NSLog(@"All c_magnitude:%lu / over max:%d", (unsigned long)[c_magniDic count], c_count);
+//    NSLog(@"All c_magnitude:%lu / over max:%d", (unsigned long)[c_magniDic count], c_count);
     NSLog(@"max: %.2f dB / avg: %.2f dB / q3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k);
 #endif
     
