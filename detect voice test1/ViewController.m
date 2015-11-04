@@ -19,7 +19,7 @@
 #define c_FREQ @"2000-4999"
 
 // MARK: Decide threshold [dB]
-#define CRY_THRESHOLD 80.0f
+#define CRY_THRESHOLD 70.0f
 #define NORMAL_THRESHOLD 60.0f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
