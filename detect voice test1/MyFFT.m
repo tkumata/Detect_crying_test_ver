@@ -36,7 +36,7 @@
         capacityN = log(aCapacity) / log(2);
         capacity = 1 << capacityN;
         
-        NSLog(@"capacity: %d n: %d", capacity, capacityN);
+//        NSLog(@"capacity: %d n: %d", capacity, capacityN);
         
         // FFTの設定をします
         fftSetup = vDSP_create_fftsetup(capacityN + 1, FFT_RADIX2);

@@ -13,7 +13,7 @@
 
 #define SAMPLE_RATE 44100.0f
 #define REC_TIME 3.0f
-#define LEVEL_PEAK -15.0f
+#define LEVEL_PEAK -13.0f
 #define s_FREQ @"300-699"
 #define w_FREQ @"800-999"
 #define c_FREQ @"2000-4999"
@@ -132,6 +132,9 @@ static void AudioInputCallback(
         [_timer invalidate];
         
         // Start recording
+#ifdef DEBUG
+        NSLog(@"Start recording.");
+#endif
         [self record];
     }
 }
@@ -286,6 +289,9 @@ static void AudioInputCallback(
                 
                 if (hz > 2000.f && hz < 5000.f)
                 {
+#if DEBUG
+//                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
+#endif
                     if (hz > 3000.f && hz < 4000.f) {
                         q3ktmp = prev_magni3/vdist[i];
                         [q3k_avgDic addObject:[NSNumber numberWithFloat:q3ktmp]];
@@ -301,9 +307,6 @@ static void AudioInputCallback(
                 else if (hz > 300.f && hz < 700.f)
                 {
                     [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-//#if DEBUG
-//                    NSLog(@"%3d %8.2fHz %.2f", i, hz, vdist[i]);
-//#endif
                 }
                 else if (hz > 6000.f && hz < 7000.f)
                 {
@@ -317,21 +320,21 @@ static void AudioInputCallback(
     
     status = ExtAudioFileDispose(audioFile);
     
-    // MARK: Calc max magnitude [dB]
+    // MARK: Calc max total magnitude [dB]
     float max_db = 20*log(max_db_per_buff);
     
-    // MARK: Calc avg magnitude [dB]
+    // MARK: Calc avg total magnitude [dB]
     NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:avgDic]]];
     id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
     float avg_db = 20*log([avgValue floatValue]);
     
     // MARK: Calc avg 'q'
-    // 3000
+    // 3000 Hz
     NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
     id q3k_avgValue = [q_avgExpression expressionValueWithObject:nil context:nil];
     q3k = [q3k_avgValue floatValue];
     
-    // 6000
+    // 6000 Hz
     NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
     q6k = [q6k_avgValue floatValue];
@@ -345,7 +348,7 @@ static void AudioInputCallback(
     if (s_db > NORMAL_THRESHOLD) {
         self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", s_FREQ, s_db];
     } else {
-        self.manActLabel.text = s_FREQ;
+        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz:", s_FREQ];
     }
     
     // calc max value for 800-1000 Hz
@@ -356,7 +359,7 @@ static void AudioInputCallback(
     if (w_db > NORMAL_THRESHOLD) {
         self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", w_FREQ, w_db];
     } else {
-        self.otherActLabel.text = w_FREQ;
+        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz:", w_FREQ];
     }
     
     // calc max value for crying (2000-4000 Hz)
@@ -367,7 +370,7 @@ static void AudioInputCallback(
     if (c_db > CRY_THRESHOLD) {
         self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", c_FREQ, c_db];
     } else {
-        self.babyActLabel.text = c_FREQ;
+        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz:", c_FREQ];
     }
     
     // MARK: Count high frequency
@@ -380,15 +383,14 @@ static void AudioInputCallback(
     }
     
     // Magnitude for Max value and AVG value
-    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2fdB / avg: %.2fdB\nq3k: %.2f q6k: %.2f", max_db, avg_db, q3k, q6k];
+    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k];
     
 #ifdef DEBUG
     NSLog(@"All c_magnitude:%lu / over max:%d", (unsigned long)[c_magniDic count], c_count);
-    NSLog(@"max: %.2fdB / avg: %.2fdB / q3k: %.2f q6k: %.2f", max_db, avg_db, q3k, q6k);
+    NSLog(@"max: %.2f dB / avg: %.2f dB / q3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k);
 #endif
     
     // MARK: Maybe, baby is crying near.
-    //if (c_count > 1 && (q3k - q6k > 3.0))
     if (q3k - q6k > 3.0)
     {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
