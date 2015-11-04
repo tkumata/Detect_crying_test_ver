@@ -382,15 +382,6 @@ static void AudioInputCallback(
         self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz:", c_FREQ];
     }
     
-    // MARK: Count high frequency
-//    int c_count = 0;
-//    for (id c_all_magni_each_bin in c_magniDic) {
-//        float c_all_db_each_bin = 20*log([c_all_magni_each_bin floatValue]);
-//        if (c_all_db_each_bin > CRY_THRESHOLD) {
-//            c_count++;
-//        }
-//    }
-    
     // Magnitude for Max value and AVG value
     self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k];
     
