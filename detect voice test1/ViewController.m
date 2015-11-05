@@ -19,8 +19,8 @@
 #define c_FREQ @"2000-4999"
 
 // MARK: Decide threshold [dB]
-#define CRY_THRESHOLD 60.0f
-#define NORMAL_THRESHOLD 60.0f
+#define CRY_THRESHOLD 50.0f
+#define NORMAL_THRESHOLD 50.0f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -392,7 +392,7 @@ static void AudioInputCallback(
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (q3k6k > 5.0)
+    if (c_db > CRY_THRESHOLD && q3k6k > 5.0)
     {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
