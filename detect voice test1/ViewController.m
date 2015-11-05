@@ -12,7 +12,7 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 3.0f
+#define REC_TIME 4.0f
 #define LEVEL_PEAK -15.0f
 #define s_FREQ @"300-699"
 #define w_FREQ @"800-999"
@@ -21,6 +21,7 @@
 // MARK: Decide threshold [dB]
 #define CRY_THRESHOLD 50.0f
 #define NORMAL_THRESHOLD 50.0f
+#define Q_THRESHOLD 6.00f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -328,17 +329,28 @@ static void AudioInputCallback(
     
     // MARK: Calc avg 'q'
     // 3000 Hz
-    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
+    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
     id q3k_avgValue = [q_avgExpression expressionValueWithObject:nil context:nil];
-    q3k = [q3k_avgValue floatValue];
+    q3k = fabsf([q3k_avgValue floatValue]);
     
     // 6000 Hz
-    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
+    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
-    q6k = [q6k_avgValue floatValue];
-    
+    q6k = fabsf([q6k_avgValue floatValue]);
+
     // MARK: ave[Fi/Fi+1]
     float q3k6k = q3k/q6k;
+//    NSMutableArray *q3k6kseed = [[NSMutableArray array] init];
+//    
+//    for (int j = 0; j < [q3k_avgDic count]; j++) {
+//        float tmp = [[q3k_avgDic objectAtIndex:j] floatValue] / [[q6k_avgDic objectAtIndex:j] floatValue];
+//        [q3k6kseed addObject:[NSNumber numberWithFloat:tmp]];
+//    }
+//    
+//    NSExpression *q3k6k_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q3k6kseed]]];
+//    id q3k6k_avgValue = [q3k6k_avgExpression expressionValueWithObject:nil context:nil];
+//    
+//    float q3k6k = [q3k6k_avgValue floatValue];
 
     // MARK: Calc each max value [dB]
     // calc max value for 300-600 Hz
@@ -384,15 +396,15 @@ static void AudioInputCallback(
     }
     
     // Magnitude for Max value and AVG value
-    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f\nq: %.2f (5.01)", max_db, avg_db, q3k, q6k, q3k6k];
+    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq: %.2f", max_db, avg_db, q3k6k];
     
 #ifdef DEBUG
-    NSLog(@"max: %.2f dB / avg: %.2f dB / q3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k);
+    NSLog(@"max: %.2f dB / avg: %.2f dB", max_db, avg_db);
     NSLog(@"q: %.2f", q3k6k);
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (c_db > CRY_THRESHOLD && q3k6k > 5.0)
+    if (c_db > CRY_THRESHOLD && q3k6k >= Q_THRESHOLD)
     {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
