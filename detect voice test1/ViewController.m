@@ -328,18 +328,19 @@ static void AudioInputCallback(
     float avg_db = 20*log([avgValue floatValue]);
     
     // MARK: Calc avg 'q'
-    // 3000 Hz
+    // 1st 3kHz
     NSExpression *q3k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
     id q3k_avgValue = [q3k_avgExpression expressionValueWithObject:nil context:nil];
     q3k = fabsf([q3k_avgValue floatValue]);
     
-    // 6000 Hz
+    // 2nd 6kHz
     NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
     q6k = fabsf([q6k_avgValue floatValue]);
 
     // MARK: ave[Fi/Fi+1]
     float q3k6k = q3k/q6k;
+    
 //    NSMutableArray *q3k6kseed = [[NSMutableArray array] init];
 //    
 //    for (int j = 0; j < [q3k_avgDic count]; j++) {
