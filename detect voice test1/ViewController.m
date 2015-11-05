@@ -384,7 +384,7 @@ static void AudioInputCallback(
     }
     
     // Magnitude for Max value and AVG value
-    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k];
+    self.maxLabel.text = [NSString stringWithFormat:@"max: %.2f dB / avg: %.2f dB\nq3k: %.2f / q6k: %.2f\nq: %.2f (5.01)", max_db, avg_db, q3k, q6k, q3k6k];
     
 #ifdef DEBUG
     NSLog(@"max: %.2f dB / avg: %.2f dB / q3k: %.2f / q6k: %.2f", max_db, avg_db, q3k, q6k);
