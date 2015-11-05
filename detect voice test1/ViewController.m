@@ -289,12 +289,12 @@ static void AudioInputCallback(
                 float hz = i * bin;
                 
                 // MARK: Gather 'q' seed
-                if (hz > 1000.f && hz < 4000.f) {
+                if (hz > 2000.f && hz < 5000.f) {
 //                    q3ktmp = prev_magni3/vdist[i];
                     [q3k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
 //                    prev_magni3 = vdist[i];
                 }
-                else if (hz > 4000.f && hz < 7000.f)
+                else if (hz > 5000.f && hz < 8000.f)
                 {
 //                    q6ktmp = prev_magni6/vdist[i];
                     [q6k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
@@ -302,7 +302,7 @@ static void AudioInputCallback(
                 }
                 
                 // MARK: Gather magnitude each frequency
-                if (hz > 2000.f && hz < 5000.f) {
+                if (hz > 2000.f && hz < 8000.f) {
                     [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
                 else if (hz > 800.f && hz < 1000.f)
