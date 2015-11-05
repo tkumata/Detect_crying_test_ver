@@ -248,11 +248,7 @@ static void AudioInputCallback(
     // average of magnitude
     float avg = 0.0;
     
-//    float prev_magni3 = 0.0;
-//    float prev_magni6 = 0.0;
-//    float q3ktmp = 0.0;
     float q3k = 0.0;
-//    float q6ktmp = 0.0;
     float q6k = 0.0;
     
     while (true) {
@@ -290,15 +286,11 @@ static void AudioInputCallback(
                 
                 // MARK: Gather 'q' seed
                 if (hz > 2000.f && hz < 5000.f) {
-//                    q3ktmp = prev_magni3/vdist[i];
                     [q3k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-//                    prev_magni3 = vdist[i];
                 }
                 else if (hz > 5000.f && hz < 8000.f)
                 {
-//                    q6ktmp = prev_magni6/vdist[i];
                     [q6k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-//                    prev_magni6 = vdist[i];
                 }
                 
                 // MARK: Gather magnitude each frequency
@@ -341,18 +333,6 @@ static void AudioInputCallback(
     // MARK: ave[Fi/Fi+1]
     float q3k6k = q3k/q6k;
     
-//    NSMutableArray *q3k6kseed = [[NSMutableArray array] init];
-//    
-//    for (int j = 0; j < [q3k_avgDic count]; j++) {
-//        float tmp = [[q3k_avgDic objectAtIndex:j] floatValue] / [[q6k_avgDic objectAtIndex:j] floatValue];
-//        [q3k6kseed addObject:[NSNumber numberWithFloat:tmp]];
-//    }
-//    
-//    NSExpression *q3k6k_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q3k6kseed]]];
-//    id q3k6k_avgValue = [q3k6k_avgExpression expressionValueWithObject:nil context:nil];
-//    
-//    float q3k6k = [q3k6k_avgValue floatValue];
-
     // MARK: Calc each max value [dB]
     // calc max value for 300-600 Hz
     NSExpression *s_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
