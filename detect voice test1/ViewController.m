@@ -328,17 +328,17 @@ static void AudioInputCallback(
     
     // MARK: Calc avg 'q'
     // 3000 Hz
-    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
+    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
     id q3k_avgValue = [q_avgExpression expressionValueWithObject:nil context:nil];
     q3k = [q3k_avgValue floatValue];
     
     // 6000 Hz
-    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
+    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
     q6k = [q6k_avgValue floatValue];
     
     // MARK: ave[Fi/Fi+1]
-    float q3k6k = (q3k/q6k)/2;
+    float q3k6k = q3k/q6k;
 
     // MARK: Calc each max value [dB]
     // calc max value for 300-600 Hz
