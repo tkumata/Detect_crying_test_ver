@@ -329,8 +329,8 @@ static void AudioInputCallback(
     
     // MARK: Calc avg 'q'
     // 3000 Hz
-    NSExpression *q_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
-    id q3k_avgValue = [q_avgExpression expressionValueWithObject:nil context:nil];
+    NSExpression *q3k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
+    id q3k_avgValue = [q3k_avgExpression expressionValueWithObject:nil context:nil];
     q3k = fabsf([q3k_avgValue floatValue]);
     
     // 6000 Hz
