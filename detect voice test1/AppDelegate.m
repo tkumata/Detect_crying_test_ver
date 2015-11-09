@@ -28,7 +28,7 @@
     }
     
     if (error) {
-        NSLog(@"audioSession: %@ %d %@", [error domain], [error code], [[error userInfo] description]);
+        NSLog(@"audioSession: %@ %ld %@", [error domain], (long)[error code], [[error userInfo] description]);
         return NO;
     }
     
@@ -36,7 +36,7 @@
     [audioSession setActive:YES error:&error];
     
     if (error) {
-        NSLog(@"audioSession: %@ %d %@", [error domain], [error code], [[error userInfo] description]);
+        NSLog(@"audioSession: %@ %ld %@", [error domain], (long)[error code], [[error userInfo] description]);
         return NO;
     }
     
