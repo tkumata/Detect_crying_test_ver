@@ -12,7 +12,7 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 4.0f
+#define REC_TIME 1.6f
 #define LEVEL_PEAK -15.0f
 #define s_FREQ @"300-699"
 #define w_FREQ @"800-999"
@@ -101,7 +101,7 @@ static void AudioInputCallback(
     AudioQueueSetProperty(_queue, kAudioQueueProperty_EnableLevelMetering, &enabledLevelMeter, sizeof(UInt32));
     
     // timer for level meter
-    _timer = [NSTimer scheduledTimerWithTimeInterval:0.5
+    _timer = [NSTimer scheduledTimerWithTimeInterval:0.3
                                               target:self
                                             selector:@selector(detectVolume:)
                                             userInfo:nil
