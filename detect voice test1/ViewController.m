@@ -12,20 +12,24 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 1.6f
-#define LEVEL_PEAK -15.0f
-#define s_FREQ @"300-699"
-#define w_FREQ @"800-999"
-#define c_FREQ @"2000-4999"
+#define REC_TIME 3.2f
+#define LEVEL_PEAK -11.0f
+#define s_FREQ @"301-700"
+#define w_FREQ @"801-1000"
+#define c_FREQ @"2001-5000"
 
 // MARK: Decide threshold [dB]
 #define CRY_THRESHOLD 50.0f
 #define NORMAL_THRESHOLD 50.0f
-#define Q_THRESHOLD 6.00f
+
+// q value threshold
+#define Q_THRESHOLD 6.0f
+
+// Timer interval
+#define INTERVAL 0.8f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
-    
     NSMutableDictionary *_dictPlayers;
 }
 
@@ -101,7 +105,7 @@ static void AudioInputCallback(
     AudioQueueSetProperty(_queue, kAudioQueueProperty_EnableLevelMetering, &enabledLevelMeter, sizeof(UInt32));
     
     // timer for level meter
-    _timer = [NSTimer scheduledTimerWithTimeInterval:0.3
+    _timer = [NSTimer scheduledTimerWithTimeInterval:INTERVAL
                                               target:self
                                             selector:@selector(detectVolume:)
                                             userInfo:nil
@@ -394,7 +398,7 @@ static void AudioInputCallback(
     }
     else
     {
-        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:0.5];
+        [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:INTERVAL];
     }
 }
 
@@ -402,7 +406,7 @@ static void AudioInputCallback(
 
 - (void)restartTimer:(int)t {
     // Timer again
-    _timer = [NSTimer scheduledTimerWithTimeInterval:0.5
+    _timer = [NSTimer scheduledTimerWithTimeInterval:INTERVAL
                                               target:self
                                             selector:@selector(detectVolume:)
                                             userInfo:nil
