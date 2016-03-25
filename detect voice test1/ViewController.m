@@ -12,7 +12,7 @@
 #import "MyFFT.h"
 
 #define SAMPLE_RATE 44100.0f
-#define REC_TIME 3.2f
+#define REC_TIME 1.6f
 #define LEVEL_PEAK -11.0f
 #define s_FREQ @"301-700"
 #define w_FREQ @"801-1000"

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		893964221BE9F515006439FB /* Readme.txt in Resources */ = {isa = PBXBuildFile; fileRef = 893964211BE9F515006439FB /* Readme.txt */; };
+		8951A2EB1CA524A300C38169 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 8951A2EA1CA524A300C38169 /* README.md */; };
 		89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 89666D541BE463C100FF0DDC /* QPTarako.mp3 */; };
 		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
@@ -23,7 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		893964211BE9F515006439FB /* Readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Readme.txt; sourceTree = "<group>"; };
+		8951A2EA1CA524A300C38169 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		89666D541BE463C100FF0DDC /* QPTarako.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = QPTarako.mp3; sourceTree = "<group>"; };
 		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -94,7 +94,7 @@
 				89A1FC231BD74B2800367C77 /* ViewController.m */,
 				89C03D1F1BD8B05C0009838B /* MyFFT.h */,
 				89C03D201BD8B0C10009838B /* MyFFT.m */,
-				893964211BE9F515006439FB /* Readme.txt */,
+				8951A2EA1CA524A300C38169 /* README.md */,
 				898FE55F1BDF65D500234C93 /* sounds */,
 				89A1FC251BD74B2800367C77 /* Main.storyboard */,
 				89A1FC281BD74B2800367C77 /* Assets.xcassets */,
@@ -176,7 +176,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				893964221BE9F515006439FB /* Readme.txt in Resources */,
 				898FE5611BDF65E800234C93 /* Water.mp3 in Resources */,
 				89A1FC2C1BD74B2800367C77 /* LaunchScreen.storyboard in Resources */,
 				89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */,
@@ -194,6 +193,7 @@
 			files = (
 				89C03D211BD8B0C10009838B /* MyFFT.m in Sources */,
 				89A1FC241BD74B2800367C77 /* ViewController.m in Sources */,
+				8951A2EB1CA524A300C38169 /* README.md in Sources */,
 				89A1FC211BD74B2800367C77 /* AppDelegate.m in Sources */,
 				89A1FC1E1BD74B2800367C77 /* main.m in Sources */,
 			);
