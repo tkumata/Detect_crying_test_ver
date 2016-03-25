@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8951A2EB1CA524A300C38169 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 8951A2EA1CA524A300C38169 /* README.md */; };
+		8951A2F11CA52A3800C38169 /* IMG_0046.png in Resources */ = {isa = PBXBuildFile; fileRef = 8951A2F01CA52A3800C38169 /* IMG_0046.png */; };
 		89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 89666D541BE463C100FF0DDC /* QPTarako.mp3 */; };
 		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
@@ -24,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		8951A2EA1CA524A300C38169 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8951A2F01CA52A3800C38169 /* IMG_0046.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMG_0046.png; sourceTree = "<group>"; };
 		89666D541BE463C100FF0DDC /* QPTarako.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = QPTarako.mp3; sourceTree = "<group>"; };
 		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -57,6 +59,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8951A2ED1CA5270200C38169 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				8951A2F01CA52A3800C38169 /* IMG_0046.png */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
 		898FE55F1BDF65D500234C93 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
@@ -95,6 +105,7 @@
 				89C03D1F1BD8B05C0009838B /* MyFFT.h */,
 				89C03D201BD8B0C10009838B /* MyFFT.m */,
 				8951A2EA1CA524A300C38169 /* README.md */,
+				8951A2ED1CA5270200C38169 /* images */,
 				898FE55F1BDF65D500234C93 /* sounds */,
 				89A1FC251BD74B2800367C77 /* Main.storyboard */,
 				89A1FC281BD74B2800367C77 /* Assets.xcassets */,
@@ -181,6 +192,7 @@
 				89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */,
 				89A1FC271BD74B2800367C77 /* Main.storyboard in Resources */,
 				89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */,
+				8951A2F11CA52A3800C38169 /* IMG_0046.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
