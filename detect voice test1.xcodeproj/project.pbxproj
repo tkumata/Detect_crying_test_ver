@@ -10,6 +10,7 @@
 		8951A2F11CA52A3800C38169 /* IMG_0046.png in Resources */ = {isa = PBXBuildFile; fileRef = 8951A2F01CA52A3800C38169 /* IMG_0046.png */; };
 		89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 89666D541BE463C100FF0DDC /* QPTarako.mp3 */; };
 		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
+		89998C3C1CA52F2B00F42FB4 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 89998C3B1CA52F2B00F42FB4 /* README.md */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
 		89A1FC1E1BD74B2800367C77 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC1D1BD74B2800367C77 /* main.m */; };
 		89A1FC211BD74B2800367C77 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A1FC201BD74B2800367C77 /* AppDelegate.m */; };
@@ -26,6 +27,7 @@
 		8951A2F01CA52A3800C38169 /* IMG_0046.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMG_0046.png; sourceTree = "<group>"; };
 		89666D541BE463C100FF0DDC /* QPTarako.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = QPTarako.mp3; sourceTree = "<group>"; };
 		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
+		89998C3B1CA52F2B00F42FB4 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		89A1FC191BD74B2800367C77 /* detect voice test1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "detect voice test1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		89A1FC1D1BD74B2800367C77 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 		89A1FC101BD74B2800367C77 = {
 			isa = PBXGroup;
 			children = (
+				89998C3B1CA52F2B00F42FB4 /* README.md */,
 				899C76D01BD85F57009E727B /* Accelerate.framework */,
 				89A1FC351BD753F000367C77 /* AudioToolbox.framework */,
 				89A1FC331BD74B4100367C77 /* AVFoundation.framework */,
@@ -202,6 +205,7 @@
 			files = (
 				89C03D211BD8B0C10009838B /* MyFFT.m in Sources */,
 				89A1FC241BD74B2800367C77 /* ViewController.m in Sources */,
+				89998C3C1CA52F2B00F42FB4 /* README.md in Sources */,
 				89A1FC211BD74B2800367C77 /* AppDelegate.m in Sources */,
 				89A1FC1E1BD74B2800367C77 /* main.m in Sources */,
 			);
