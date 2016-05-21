@@ -14,19 +14,19 @@
 #define SAMPLE_RATE 44100.0f
 #define REC_TIME 1.6f
 #define LEVEL_PEAK -11.0f
-#define s_FREQ @"301-700"
-#define w_FREQ @"801-1000"
-#define c_FREQ @"2001-5000"
+#define NORMAL_FREQ @"301-700"
+#define W_FREQ @"801-1000"
+#define CRYING_FREQ @"2001-5000"
 
 // MARK: Decide threshold [dB]
-#define CRY_THRESHOLD 50.0f
+#define CRY_THRESHOLD 70.0f
 #define NORMAL_THRESHOLD 50.0f
 
 // q value threshold
 #define Q_THRESHOLD 6.0f
 
 // Timer interval
-#define INTERVAL 0.8f
+#define INTERVAL 0.5f
 
 @interface ViewController () <AVAudioPlayerDelegate, AVAudioRecorderDelegate> {
     AVAudioRecorder *avRecorder;
@@ -71,7 +71,11 @@ static void AudioInputCallback(
     [player setNumberOfLoops:loop];
     player.delegate = (id)self;
     [player prepareToPlay];
-    if (_dictPlayers == nil) _dictPlayers = [NSMutableDictionary dictionary];
+    
+    if (_dictPlayers == nil) {
+        _dictPlayers = [NSMutableDictionary dictionary];
+    }
+    
     [_dictPlayers setObject:player forKey:[[player.url path] lastPathComponent]];
     player.volume = 0.7;
     [player play];
@@ -235,9 +239,9 @@ static void AudioInputCallback(
     float vdist[frameCount];
     
     // magnitude scalar array for each frequency
-    NSMutableArray *c_magniDic = [[NSMutableArray array] init];
-    NSMutableArray *w_magniDic = [[NSMutableArray array] init];
-    NSMutableArray *s_magniDic = [[NSMutableArray array] init];
+    NSMutableArray *crying_magnitude_dict = [[NSMutableArray array] init];
+    NSMutableArray *w_magnitude_dict = [[NSMutableArray array] init];
+    NSMutableArray *normal_magnitude_dict = [[NSMutableArray array] init];
     NSMutableArray *avgDic = [[NSMutableArray array] init];
     NSMutableArray *q3k_avgDic = [[NSMutableArray array] init];
     NSMutableArray *q6k_avgDic = [[NSMutableArray array] init];
@@ -299,15 +303,15 @@ static void AudioInputCallback(
                 
                 // MARK: Gather magnitude each frequency
                 if (hz > 2000.f && hz < 8000.f) {
-                    [c_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                    [crying_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
                 else if (hz > 800.f && hz < 1000.f)
                 {
-                    [w_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                    [w_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
                 else if (hz > 300.f && hz < 700.f)
                 {
-                    [s_magniDic addObject:[NSNumber numberWithFloat:vdist[i]]];
+                    [normal_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
             }
         }
@@ -319,18 +323,21 @@ static void AudioInputCallback(
     float max_db = 20*log(max_db_per_buff);
     
     // MARK: Calc avg total magnitude [dB]
-    NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:" arguments:@[[NSExpression expressionForConstantValue:avgDic]]];
+    NSExpression *avgExpression = [NSExpression expressionForFunction:@"average:"
+                                                            arguments:@[[NSExpression expressionForConstantValue:avgDic]]];
     id avgValue = [avgExpression expressionValueWithObject:nil context:nil];
     float avg_db = 20*log([avgValue floatValue]);
     
     // MARK: Calc avg 'q'
     // 1st 3kHz
-    NSExpression *q3k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
+    NSExpression *q3k_avgExpression = [NSExpression expressionForFunction:@"sum:"
+                                                                arguments:@[[NSExpression expressionForConstantValue:q3k_avgDic]]];
     id q3k_avgValue = [q3k_avgExpression expressionValueWithObject:nil context:nil];
     q3k = fabsf([q3k_avgValue floatValue]);
     
     // 2nd 6kHz
-    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"sum:" arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
+    NSExpression *q6k_avgExpression = [NSExpression expressionForFunction:@"sum:"
+                                                                arguments:@[[NSExpression expressionForConstantValue:q6k_avgDic]]];
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
     q6k = fabsf([q6k_avgValue floatValue]);
 
@@ -339,45 +346,48 @@ static void AudioInputCallback(
     
     // MARK: Calc each max value [dB]
     // calc max value for 300-600 Hz
-    NSExpression *s_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:s_magniDic]]];
-    id s_maxValue = [s_maxExpression expressionValueWithObject:nil context:nil];
-    float s_db = 20*log([s_maxValue floatValue]);
+    NSExpression *normal_maxExpression = [NSExpression expressionForFunction:@"max:"
+                                                                   arguments:@[[NSExpression expressionForConstantValue:normal_magnitude_dict]]];
+    id normal_max_value = [normal_maxExpression expressionValueWithObject:nil context:nil];
+    float normal_db = 20*log([normal_max_value floatValue]);
     
-    if (s_db > NORMAL_THRESHOLD) {
+    if (normal_db > NORMAL_THRESHOLD) {
 #ifdef DEBUG
-        NSLog(@"%@ Hz: %.2f dB", s_FREQ, s_db);
+        NSLog(@"%@ Hz: %.2f dB", NORMAL_FREQ, normal_db);
 #endif
-        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", s_FREQ, s_db];
+        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", NORMAL_FREQ, normal_db];
     } else {
-        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz:", s_FREQ];
+        self.manActLabel.text = [NSString stringWithFormat:@"%@ Hz:", NORMAL_FREQ];
     }
     
     // calc max value for 800-1000 Hz
-    NSExpression *w_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:w_magniDic]]];
+    NSExpression *w_maxExpression = [NSExpression expressionForFunction:@"max:"
+                                                              arguments:@[[NSExpression expressionForConstantValue:w_magnitude_dict]]];
     id w_maxValue = [w_maxExpression expressionValueWithObject:nil context:nil];
     float w_db = 20*log([w_maxValue floatValue]);
     
     if (w_db > NORMAL_THRESHOLD) {
 #ifdef DEBUG
-        NSLog(@"%@ Hz: %.2f dB", w_FREQ, w_db);
+        NSLog(@"%@ Hz: %.2f dB", W_FREQ, w_db);
 #endif
-        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", w_FREQ, w_db];
+        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", W_FREQ, w_db];
     } else {
-        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz:", w_FREQ];
+        self.otherActLabel.text = [NSString stringWithFormat:@"%@ Hz:", W_FREQ];
     }
     
     // calc max value for crying (2000-4000 Hz)
-    NSExpression *c_maxExpression = [NSExpression expressionForFunction:@"max:" arguments:@[[NSExpression expressionForConstantValue:c_magniDic]]];
-    id c_maxValue = [c_maxExpression expressionValueWithObject:nil context:nil];
-    float c_db = 20*log([c_maxValue floatValue]);
+    NSExpression *crying_maxExpression = [NSExpression expressionForFunction:@"max:"
+                                                                   arguments:@[[NSExpression expressionForConstantValue:crying_magnitude_dict]]];
+    id crying_max_value = [crying_maxExpression expressionValueWithObject:nil context:nil];
+    float crying_db = 20*log([crying_max_value floatValue]);
     
-    if (c_db > CRY_THRESHOLD) {
+    if (crying_db > CRY_THRESHOLD) {
 #ifdef DEBUG
-        NSLog(@"%@ Hz: %.2f dB", c_FREQ, c_db);
+        NSLog(@"%@ Hz: %.2f dB", CRYING_FREQ, crying_db);
 #endif
-        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", c_FREQ, c_db];
+        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz: %.2f dB", CRYING_FREQ, crying_db];
     } else {
-        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz:", c_FREQ];
+        self.babyActLabel.text = [NSString stringWithFormat:@"%@ Hz:", CRYING_FREQ];
     }
     
     // Magnitude for Max value and AVG value
@@ -389,7 +399,7 @@ static void AudioInputCallback(
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (c_db > CRY_THRESHOLD && q3k6k >= Q_THRESHOLD)
+    if (crying_db > CRY_THRESHOLD && q3k6k >= Q_THRESHOLD)
     {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
