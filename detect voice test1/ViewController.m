@@ -13,17 +13,17 @@
 
 #define SAMPLE_RATE 44100.0f
 #define REC_TIME 1.6f
-#define LEVEL_PEAK -11.0f
-#define NORMAL_FREQ @"301-700"
-#define W_FREQ @"801-1000"
-#define CRYING_FREQ @"2001-5000"
+#define LEVEL_PEAK -16.0f
+#define NORMAL_FREQ @"301-700" // freq range which human speaks.
+#define W_FREQ @"801-1000" // i forgot. X(
+#define CRYING_FREQ @"2001-5000" // freq range when baby cry.
 
 // MARK: Decide threshold [dB]
-#define CRY_THRESHOLD 70.0f
+#define CRY_THRESHOLD 50.0f
 #define NORMAL_THRESHOLD 50.0f
 
 // q value threshold
-#define Q_THRESHOLD 6.0f
+#define Q_THRESHOLD 5.5f
 
 // Timer interval
 #define INTERVAL 0.5f
@@ -53,7 +53,6 @@ static void AudioInputCallback(
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
     [self startUpdatingVolume];
 }
 
@@ -77,7 +76,8 @@ static void AudioInputCallback(
     }
     
     [_dictPlayers setObject:player forKey:[[player.url path] lastPathComponent]];
-    player.volume = 0.7;
+    [player setVolume: 1.0];
+    player.volume = 1.0f;
     [player play];
 }
 
@@ -292,25 +292,19 @@ static void AudioInputCallback(
             for (int i = 0; i < frameCount/2; i++) {
                 float hz = i * bin;
                 
-                // MARK: Gather 'q' seed
+                // MARK: Gather magnitude for 'q' seed
                 if (hz > 2000.f && hz < 5000.f) {
                     [q3k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
-                }
-                else if (hz > 5000.f && hz < 8000.f)
-                {
+                } else if (hz > 5000.f && hz < 8000.f) {
                     [q6k_avgDic addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
                 
                 // MARK: Gather magnitude each frequency
                 if (hz > 2000.f && hz < 8000.f) {
                     [crying_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
-                }
-                else if (hz > 800.f && hz < 1000.f)
-                {
+                } else if (hz > 800.f && hz < 1000.f) {
                     [w_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
-                }
-                else if (hz > 300.f && hz < 700.f)
-                {
+                } else if (hz > 300.f && hz < 700.f) {
                     [normal_magnitude_dict addObject:[NSNumber numberWithFloat:vdist[i]]];
                 }
             }
@@ -341,7 +335,7 @@ static void AudioInputCallback(
     id q6k_avgValue = [q6k_avgExpression expressionValueWithObject:nil context:nil];
     q6k = fabsf([q6k_avgValue floatValue]);
 
-    // MARK: ave[Fi/Fi+1]
+    // MARK: ave[F(i)/F(i+1)]
     float q3k6k = q3k/q6k;
     
     // MARK: Calc each max value [dB]
@@ -399,15 +393,15 @@ static void AudioInputCallback(
 #endif
     
     // MARK: Maybe, baby is crying near.
-    if (crying_db > CRY_THRESHOLD && q3k6k >= Q_THRESHOLD)
-    {
+    if (q3k6k >= Q_THRESHOLD) {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:30.0];
         
+        self.loudLabel.text = @"Crying";
+        self.view.backgroundColor = [UIColor yellowColor];
+
         // Play sound
         [self playSound:@"QPTarako.mp3" loop:0];
-    }
-    else
-    {
+    } else {
         [self performSelector:@selector(restartTimer:) withObject:nil afterDelay:INTERVAL];
     }
 }
@@ -415,6 +409,8 @@ static void AudioInputCallback(
 #pragma  mark Restart timer method
 
 - (void)restartTimer:(int)t {
+    self.view.backgroundColor = [UIColor whiteColor];
+    
     // Timer again
     _timer = [NSTimer scheduledTimerWithTimeInterval:INTERVAL
                                               target:self
