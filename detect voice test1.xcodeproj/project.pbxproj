@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8951A2F11CA52A3800C38169 /* IMG_0046.png in Resources */ = {isa = PBXBuildFile; fileRef = 8951A2F01CA52A3800C38169 /* IMG_0046.png */; };
 		89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 89666D541BE463C100FF0DDC /* QPTarako.mp3 */; };
+		89779A7A1DE6C34800B87336 /* IMG_0046.png in Resources */ = {isa = PBXBuildFile; fileRef = 89779A791DE6C34800B87336 /* IMG_0046.png */; };
 		898B026B1CF0104C003EA13B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 89998C3B1CA52F2B00F42FB4 /* README.md */; };
 		898FE5611BDF65E800234C93 /* Water.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 898FE5601BDF65E800234C93 /* Water.mp3 */; };
 		899C76D11BD85F57009E727B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 899C76D01BD85F57009E727B /* Accelerate.framework */; };
@@ -24,8 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8951A2F01CA52A3800C38169 /* IMG_0046.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMG_0046.png; sourceTree = "<group>"; };
 		89666D541BE463C100FF0DDC /* QPTarako.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = QPTarako.mp3; sourceTree = "<group>"; };
+		89779A791DE6C34800B87336 /* IMG_0046.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMG_0046.png; sourceTree = "<group>"; };
 		898FE5601BDF65E800234C93 /* Water.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Water.mp3; sourceTree = "<group>"; };
 		89998C3B1CA52F2B00F42FB4 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		899C76D01BD85F57009E727B /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -59,10 +59,10 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8951A2ED1CA5270200C38169 /* images */ = {
+		89779A781DE6C34800B87336 /* images */ = {
 			isa = PBXGroup;
 			children = (
-				8951A2F01CA52A3800C38169 /* IMG_0046.png */,
+				89779A791DE6C34800B87336 /* IMG_0046.png */,
 			);
 			path = images;
 			sourceTree = "<group>";
@@ -80,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				89998C3B1CA52F2B00F42FB4 /* README.md */,
+				89779A781DE6C34800B87336 /* images */,
 				899C76D01BD85F57009E727B /* Accelerate.framework */,
 				89A1FC351BD753F000367C77 /* AudioToolbox.framework */,
 				89A1FC331BD74B4100367C77 /* AVFoundation.framework */,
@@ -109,7 +110,6 @@
 				89A1FC2A1BD74B2800367C77 /* LaunchScreen.storyboard */,
 				89A1FC2D1BD74B2800367C77 /* Info.plist */,
 				89A1FC281BD74B2800367C77 /* Assets.xcassets */,
-				8951A2ED1CA5270200C38169 /* images */,
 				898FE55F1BDF65D500234C93 /* sounds */,
 				89A1FC1C1BD74B2800367C77 /* Supporting Files */,
 			);
@@ -188,12 +188,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				898B026B1CF0104C003EA13B /* README.md in Resources */,
+				89779A7A1DE6C34800B87336 /* IMG_0046.png in Resources */,
 				898FE5611BDF65E800234C93 /* Water.mp3 in Resources */,
 				89A1FC2C1BD74B2800367C77 /* LaunchScreen.storyboard in Resources */,
 				89A1FC291BD74B2800367C77 /* Assets.xcassets in Resources */,
 				89A1FC271BD74B2800367C77 /* Main.storyboard in Resources */,
 				89666D551BE463C100FF0DDC /* QPTarako.mp3 in Resources */,
-				8951A2F11CA52A3800C38169 /* IMG_0046.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
